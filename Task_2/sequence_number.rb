@@ -66,5 +66,3 @@ end
 sequence_number += 1 if is_leap == true
 
 puts "The date sequence number is #{sequence_number}."
-
-
