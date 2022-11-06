@@ -2,6 +2,7 @@ require_relative 'station.rb'
 require_relative 'route.rb'
 require_relative 'train.rb'
 
+=begin
 station1 = Station.new("Los Santos")
 station2 = Station.new("San Fierro")
 station3 = Station.new("Las Venturas")
@@ -25,3 +26,4 @@ train7 = Train.new("sx23", "Passenger", 50)
 train8 = Train.new("gt54", "Passenger", 50)
 train9 = Train.new("hg33", "Passenger", 30)
 train10 = Train.new("xd76", "Passenger", 30)
+=end
