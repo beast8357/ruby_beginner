@@ -1,6 +1,5 @@
 class Train
-  attr_accessor :speed
-  attr_reader :number, :type, :cars, :speed, :route, :stations, :current_station
+  attr_reader :number, :type, :cars, :speed
 
   def initialize(number, type, cars)
     @number = number
@@ -14,10 +13,6 @@ class Train
     puts "Speed increased by #{value}."
   end
 
-  def show_speed
-    puts "Current speed: #{@speed}."
-  end
-
   def brake(value)
     @speed -= value
     if @speed > 0
@@ -25,10 +20,6 @@ class Train
     else
       puts "The train stopped."
     end
-  end
-
-  def show_cars
-    puts "Current cars number: #{@cars}."
   end
 
   def remove_car
@@ -60,18 +51,16 @@ class Train
     puts "Route has been taken by Train #{self.number}."
   end
   
+  def show_current_station
+    puts "The current station is #{@current_station.name}."
+  end
+
   def go_to_next_station
-    return if next_station.nil?
     change_current_station(next_station)
   end  
 
   def go_to_previous_station
-    return if previous_station.nil?
     change_current_station(previous_station)
-  end
-
-  def show_current_station
-    puts "The current station is #{@current_station.name}."
   end
 
   def change_current_station(station)
@@ -105,5 +94,6 @@ class Train
     puts "Train #{self.number} successfully arrived at station #{@current_station.name}."
   end
 end
+
 
 
