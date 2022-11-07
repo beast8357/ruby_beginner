@@ -26,14 +26,16 @@ train6 = Train.new("xd76", "Passenger", 30)
 route1.add_station(station2)
 route1.add_station(station5)
 route1.add_station(station6)
-
+route1.show_stations
 train1.take_route(route1)
 train1.go_to_next_station
+train1.show_current_station
 train1.go_to_next_station
+train1.show_current_station
 train1.go_to_next_station
+train1.show_current_station
 train1.go_to_previous_station
 train1.show_current_station
-
-
-
+train1.go_to_previous_station
+train1.show_current_station
 
