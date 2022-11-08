@@ -16,12 +16,6 @@ class Station
     "Train #{train.number} has been sent."
   end
 
-  def show_trains
-    @trains.each do |train|
-      puts "Number: #{train.number}; Type: #{train.type}; Cars: #{train.cars}."
-    end
-  end
-
   def train_types
     types = Hash.new(0)
     @trains.each do |train|

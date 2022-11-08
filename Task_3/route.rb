@@ -16,7 +16,6 @@ class Route
   end
 
   def show_stations
-    puts "Current route:"
     @stations.each do |station|
       puts station.name
     end

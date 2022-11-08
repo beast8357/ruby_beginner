@@ -22,6 +22,15 @@ class Train
     end
   end
 
+  def add_car
+    if @speed == 0
+      @cars += 1
+      puts "Car added."
+    else
+      puts "The train must stop in order to add a car."
+    end
+  end
+
   def remove_car
     if @speed == 0
       if @cars > 0
@@ -32,15 +41,6 @@ class Train
       end
     else
       puts "The train must stop in order to remove a car."
-    end
-  end
-
-  def add_car
-    if @speed == 0
-      @cars += 1
-      puts "Car added."
-    else
-      puts "The train must stop in order to add a car."
     end
   end
 
@@ -94,4 +94,6 @@ class Train
     puts "Train #{self.number} successfully arrived at station #{@current_station.name}."
   end
 end
+
+
 
