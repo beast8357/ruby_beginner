@@ -1,26 +1,24 @@
 class Station
-  attr_reader :name, :trains
+  attr_reader :name, :trains, :train_types
 
   def initialize(name)
     @name = name
     @trains = []
+    @train_types = Hash.new(0)
   end
 
   def take_train(train)
     @trains << train
-    "Train #{train.number} has been taken."
   end
 
   def send_train(train)
     @trains.delete(train)
-    "Train #{train.number} has been sent."
   end
 
   def train_types
-    types = Hash.new(0)
+    @train_types.clear
     @trains.each do |train|
-      types[train.type] += 1
+      train_types[train.type] += 1
     end
-    types
   end
 end
