@@ -8,16 +8,16 @@ class Station
   end
 
   def take_train(train)
-    @trains << train
+    trains << train
   end
 
   def send_train(train)
-    @trains.delete(train)
+    trains.delete(train)
   end
 
   def train_types
-    @train_types.clear
-    @trains.each do |train|
+    train_types.clear
+    trains.each do |train|
       train_types[train.type] += 1
     end
   end

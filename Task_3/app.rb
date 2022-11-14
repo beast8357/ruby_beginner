@@ -1,6 +1,4 @@
 class App
-  attr_reader :station, :routes, :trains
-
   def initialize
     @stations = {}
     @routes = {}
@@ -8,29 +6,12 @@ class App
   end
 
   def menu
-    actions_list = <<~HEREDOC
-    ============ TO PERFORM AN ACTION, ENTER ITS NUMBER ============
-    | 1. Create a station                                          |
-    | 2. Create a train                                            |
-    | 3. Create a route                                            |
-    | 4. Add a station to the route                                |
-    | 5. Remove a station from the route                           |
-    | 6. Assign a route to the train                               |
-    | 7. Add a car to the train                                    |
-    | 8. Unhook a car from the train                               |
-    | 9. Move the train to the next station                        |
-    | 10. Move the train to the previous station                   |
-    | 11. View the list of stations on the route                   |
-    | 12. View the list of trains at the station                   |
-    | 0. Quit                                                      |
-    ================================================================
-    HEREDOC
-
     loop do
-      puts actions_list
+      actions_list
       prompt
-      input = gets.chomp.to_i
-      exit if input.zero?
+      input = gets.chomp
+      next if input.empty?
+      input = input.to_i
       case input
         when 1
           create_station
@@ -53,22 +34,50 @@ class App
         when 10
           move_train(:back)
         when 11
-          show_route_stations
+          route_stations
         when 12
-          show_trains_at_station
+          trains_at_station
         when 0
-          puts "See you later!"
-          break
+          goodbye
       end
     end
+  end
+
+=begin
+  Атрибуты класса, а также методы, реализующие функционал приложения,
+  скрыты с целью закрыть к ним доступ вне данного класса
+=end
+  private
+
+  attr_reader :stations, :routes, :trains
+
+  def actions_list
+    list = <<~HEREDOC
+    ============ TO PERFORM AN ACTION, ENTER ITS NUMBER ============
+    | 1. Create a station                                          |
+    | 2. Create a train                                            |
+    | 3. Create a route                                            |
+    | 4. Add a station to the route                                |
+    | 5. Remove a station from the route                           |
+    | 6. Assign a route to the train                               |
+    | 7. Add a car to the train                                    |
+    | 8. Unhook a car from the train                               |
+    | 9. Move the train to the next station                        |
+    | 10. Move the train to the previous station                   |
+    | 11. View the list of stations on the route                   |
+    | 12. View the list of trains at the station                   |
+    | 0. Quit                                                      |
+    ================================================================
+    HEREDOC
+    puts list
   end
 
   def create_station
     puts "Enter the name of the station."
     prompt
     station_name = gets.chomp
-    if @stations[station_name].nil?
-      @stations[station_name] = Station.new(station_name)
+    if stations[station_name].nil?
+      stations[station_name] = Station.new(station_name)
       status 
       puts "#{station_name} station has been created!"
     else
@@ -94,8 +103,8 @@ class App
     case type
       when :passenger
         number = "P-" + number
-        if @trains[number].nil?
-          @trains[number] = PassengerTrain.new(number)
+        if trains[number].nil?
+          trains[number] = PassengerTrain.new(number)
           status
           puts "Passenger train #{number} has been created!"
         else
@@ -104,8 +113,8 @@ class App
         end
       when :cargo
         number = "C-" + number
-        if @trains[number].nil?
-          @trains[number] = CargoTrain.new(number)
+        if trains[number].nil?
+          trains[number] = CargoTrain.new(number)
           status
           puts "Cargo train #{number} has been created!"
         else
@@ -116,7 +125,7 @@ class App
   end
 
   def create_route
-    if @stations.empty?
+    if stations.empty?
       status
       puts "No stations available!"
     else
@@ -127,17 +136,17 @@ class App
       puts "Enter the end station name."
       prompt
       end_station_name = gets.chomp
-      starting_station = @stations[starting_station_name]
-      end_station = @stations[end_station_name]
+      starting_station = stations[starting_station_name]
+      end_station = stations[end_station_name]
       route_name = "#{starting_station_name}-#{end_station_name}"
-      @routes[route_name] = Route.new(starting_station, end_station)
+      routes[route_name] = Route.new(starting_station, end_station)
       status
       puts "Route <<#{route_name}>> has been created!"
     end
   end
 
   def add_station
-    if @routes.empty?
+    if routes.empty?
       status
       puts "No routes available!"
     else
@@ -163,7 +172,7 @@ class App
     prompt
     route_name = gets.chomp
     route = get_route(route_name)
-    route_stations(route)
+    show_route_stations(route)
     puts "Enter the name of the station you'd like to remove."
     prompt
     station_name = gets.chomp
@@ -244,44 +253,6 @@ class App
     end
   end
 
-  def show_route_stations
-    show_routes_names
-    puts "Enter the name of the route."
-    prompt
-    route_name = gets.chomp
-    route = get_route(route_name)
-    route_stations(route)
-  end
-
-  def show_trains_at_station
-    show_stations_names
-    puts "Enter the name of the station."
-    prompt
-    station_name = gets.chomp
-    station = get_station(station_name)
-    trains_at_station(station)
-  end
-
-# Реализация методов ниже скрыта в целях обеспечения стабильности работы приложения
-
-  private
-
-  def route_stations(route)
-    stations_list = route.stations
-    puts "Current route stations:"
-    stations_list.each.with_index(1) do |station, index|
-      puts "#{index}. #{station.name}"
-    end
-  end
-
-  def trains_at_station(station)
-    trains_list = station.trains
-    puts "Trains at this station:"
-    trains_list.each.with_index(1) do |train, index|
-      puts "#{index}. #{train.number}"
-    end
-  end
-
   def move_train(direction)
     show_trains_numbers
     case direction
@@ -310,34 +281,68 @@ class App
     end
   end
 
+  def route_stations
+    show_routes_names
+    puts "Enter the name of the route."
+    prompt
+    route_name = gets.chomp
+    route = get_route(route_name)
+    show_route_stations(route)
+  end
+
+  def trains_at_station
+    show_stations_names
+    puts "Enter the name of the station."
+    prompt
+    station_name = gets.chomp
+    station = get_station(station_name)
+    show_trains_at_station(station)
+  end
+
+  def show_route_stations(route)
+    stations_list = route.stations
+    puts "Current route stations:"
+    stations_list.each.with_index(1) do |station, index|
+      puts "#{index}. #{station.name}"
+    end
+  end
+
+  def show_trains_at_station(station)
+    trains_list = station.trains
+    puts "Trains at this station:"
+    trains_list.each.with_index(1) do |train, index|
+      puts "#{index}. #{train.number}"
+    end
+  end
+
   def show_routes_names
-    @routes.keys.each.with_index(1) do |route_name, index|
+    routes.keys.each.with_index(1) do |route_name, index|
       puts "#{index}. #{route_name}"
     end
   end
 
   def show_trains_numbers
-    @trains.values.each.with_index(1) do |train, index|
+    trains.values.each.with_index(1) do |train, index|
       puts "#{index}. #{train.number}"
     end
   end
 
   def show_stations_names
-    @stations.values.each do |station|
+    stations.values.each do |station|
       puts station.name
     end
   end
 
   def get_station(station_name)
-    @stations[station_name]
+    stations[station_name]
   end
 
   def get_route(route_name)
-    @routes[route_name]
+    routes[route_name]
   end
 
   def get_train(number)
-    @trains[number]
+    trains[number]
   end
 
   def car_adding_success_message
@@ -356,5 +361,10 @@ class App
 
   def prompt
     print "Your input: "
+  end
+
+  def goodbye
+    puts "See you later!"
+    exit
   end
 end
