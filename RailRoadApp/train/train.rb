@@ -1,10 +1,20 @@
 class Train
+  include Manufacturer
+  include InstanceCounter
+
+  @@trains = {}
+
+  def self.find(number)
+    trains[number]
+  end
+
   attr_reader :number, :type, :cars, :speed, :current_station
 
   def initialize(number)
     @number = number
     @cars = []
     @speed = 0
+    @@trains[number] = self
   end
 
   def gain_speed(value)

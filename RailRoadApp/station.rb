@@ -1,10 +1,21 @@
 class Station
+  include InstanceCounter
+
+  @@stations = []
+
+  def self.all
+    @@stations.each do |station|
+      station
+    end
+  end
+
   attr_reader :name, :trains, :train_types
 
   def initialize(name)
     @name = name
     @trains = []
     @train_types = Hash.new(0)
+    @@stations << self
   end
 
   def take_train(train)
