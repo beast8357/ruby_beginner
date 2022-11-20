@@ -11,13 +11,14 @@ class Train
     trains[number]
   end
 
-  attr_reader :number, :type, :cars, :speed, :current_station
+  attr_reader :number, :type, :cars, :speed, :current_station, :trains
 
   def initialize(number)
     @number = number
     @cars = []
     @speed = 0
     @@trains[number] = self
+    register_instance
   end
 
   def gain_speed(value)
