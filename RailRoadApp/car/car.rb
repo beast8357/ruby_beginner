@@ -4,7 +4,16 @@ class Car
   include Manufacturer
   attr_reader :type
   
-  def initialize
-    @type = nil
+  TYPE_FORMAT = /^cargo$|^passenger$/
+
+  def initialize(type = nil)
+    @type = type
+    validate!
+  end
+
+  private
+  def validate!
+    raise "InputError: Type must be \'cargo\' or \'passenger\'." if
+          @type.to_s !~ TYPE_FORMAT
   end
 end

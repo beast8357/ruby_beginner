@@ -6,6 +6,7 @@ class Route
 
   def initialize(starting_station, end_station)
     @stations = [starting_station, end_station]
+    validate!
     register_instance
   end
 
@@ -21,5 +22,10 @@ class Route
     stations.each do |station|
       puts station.name
     end
+  end
+
+  private
+  def validate!
+    raise "NotEnoughStationsError: At least 2 stations required." if stations.size < 2
   end
 end

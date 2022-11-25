@@ -11,12 +11,17 @@ class Train
     trains[number]
   end
 
-  attr_reader :number, :type, :cars, :speed, :current_station, :trains
+  attr_reader :number, :type, :speed, :cars, :trains, 
+              :route, :current_station
 
-  def initialize(number)
+  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
+
+  def initialize(number, type = nil)
     @number = number
-    @cars = []
+    @type = type
+    validate!
     @speed = 0
+    @cars = []
     @@trains[number] = self
     register_instance
   end
@@ -31,19 +36,17 @@ class Train
   end
 
   def add_car(car)
-    cars.push(car) if speed == 0
+    cars << car if speed == 0 && car.type == type
   end
 
-  def unhook_car(car)
-    if speed == 0
-      cars.delete(car) if cars.size > 0 
-    end
+  def unhook_car
+    cars.pop if speed == 0 && cars.size > 0
   end
 
   def take_route(route)
-    route = route
-    current_station = route.stations.first
-    current_station.take_train(self)
+    @route = route
+    @current_station = @route.stations.first
+    @current_station.take_train(self)
   end
 
   def to_next_station
@@ -65,18 +68,18 @@ class Train
   end
 
   def change_current_station(station)
-    current_station.send_train(self)
-    current_station = station
-    current_station.take_train(self)
+    @current_station.send_train(self)
+    @current_station = station
+    @current_station.take_train(self)
   end
 
   def current_station_index
     route.stations.index(current_station)
   end
+
+  private
+  def validate!
+    raise "InputError: Invalid number format." if @number !~ NUMBER_FORMAT
+    raise "NilTypeError: Nil type." if @type.nil?
+  end
 end
-
-
-
-
-
-
