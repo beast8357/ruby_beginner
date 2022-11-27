@@ -13,7 +13,7 @@ class Car
 
   private
   def validate!
-    raise "InputError: Type must be \'cargo\' or \'passenger\'." if
+    raise "TypeError: Type must be \'cargo\' or \'passenger\'." if
           @type.to_s !~ TYPE_FORMAT
   end
 end

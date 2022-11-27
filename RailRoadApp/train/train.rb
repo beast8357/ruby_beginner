@@ -15,6 +15,7 @@ class Train
               :route, :current_station
 
   NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
+  TYPE_FORMAT = /^cargo$|^passenger$/
 
   def initialize(number, type = nil)
     @number = number
@@ -80,6 +81,8 @@ class Train
   private
   def validate!
     raise "InputError: Invalid number format." if @number !~ NUMBER_FORMAT
-    raise "NilTypeError: Nil type." if @type.nil?
+    raise "TypeError: Nil type." if @type.nil?
+    raise "TypeError: Type must be \'cargo\' or \'passenger\'." if
+          @type.to_s !~ TYPE_FORMAT
   end
 end
