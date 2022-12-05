@@ -1,7 +1,6 @@
 class PassengerCar < Car
-  attr_reader :type
-
-  def initialize
-    super(:passenger)
+  
+  def initialize(seats)
+    super(:passenger, seats)
   end
 end

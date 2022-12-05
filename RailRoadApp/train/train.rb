@@ -4,6 +4,11 @@ require_relative "../modules/instance_counter"
 class Train
   include Manufacturer
   include InstanceCounter
+  attr_reader :number, :type, :speed, :cars, :trains, 
+              :route, :current_station
+
+  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
+  TYPE_FORMAT = /^cargo$|^passenger$/
 
   @@trains = {}
 
@@ -11,19 +16,13 @@ class Train
     trains[number]
   end
 
-  attr_reader :number, :type, :speed, :cars, :trains, 
-              :route, :current_station
-
-  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
-  TYPE_FORMAT = /^cargo$|^passenger$/
-
-  def initialize(number, type = nil)
+  def initialize(number = nil, type = nil)
     @number = number
     @type = type
-    validate!
     @speed = 0
     @cars = []
     @@trains[number] = self
+    validate!
     register_instance
   end
 
@@ -78,11 +77,15 @@ class Train
     route.stations.index(current_station)
   end
 
+  def each_car(&block)
+    raise "No block given." unless block_given?
+    cars.each.with_index(1) { |car, index| block.call(car, index) }
+  end
+
   private
+
   def validate!
-    raise "InputError: Invalid number format." if @number !~ NUMBER_FORMAT
-    raise "TypeError: Nil type." if @type.nil?
-    raise "TypeError: Type must be \'cargo\' or \'passenger\'." if
-          @type.to_s !~ TYPE_FORMAT
+    raise "Invalid number format." if number !~ NUMBER_FORMAT
+    raise "Type must be \'cargo\' or \'passenger\'." if type.to_s !~ TYPE_FORMAT
   end
 end
