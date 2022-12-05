@@ -275,7 +275,7 @@ class App
       when :cargo
         puts "Enter the car's volume."
         prompt
-        volume = gets.chomp.to_i
+        volume = gets.chomp.to_f
 
         raise "Input must be 0 or above." if volume < 0
 
@@ -337,13 +337,13 @@ class App
         puts "Enter the number of seats you'd like to take."
         prompt
         seats = gets.chomp.to_i
-        car.occupy(seats)
+        car.take_seats(seats)
         success
       when :cargo
         puts "Enter the volume you'd like to occupy."
         prompt
-        volume = gets.chomp.to_i
-        car.occupy(volume)
+        volume = gets.chomp.to_f
+        car.occupy_volume(volume)
         success
     end
 
@@ -412,8 +412,8 @@ class App
 
       case train.type
         when :passenger
-          puts "Free seats: #{car.free_volume}, " +
-                "Seats taken: #{car.occupied_volume}"
+          puts "Free seats: #{car.free_seats}, " +
+                "Seats taken: #{car.taken_seats}"
         when :cargo
           puts "Unoccupied volume: #{car.free_volume}, " +
                 "Volume occupied: #{car.occupied_volume}"
