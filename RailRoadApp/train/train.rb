@@ -4,8 +4,7 @@ require_relative "../modules/instance_counter"
 class Train
   include Manufacturer
   include InstanceCounter
-  attr_reader :number, :type, :speed, :cars, :trains, 
-              :route, :current_station
+  attr_reader :number, :type, :speed, :cars, :trains, :route, :current_station
 
   NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
   TYPE_FORMAT = /^cargo$|^passenger$/
@@ -68,9 +67,9 @@ class Train
   end
 
   def change_current_station(station)
-    @current_station.send_train(self)
+    current_station.send_train(self)
     @current_station = station
-    @current_station.take_train(self)
+    current_station.take_train(self)
   end
 
   def current_station_index
@@ -84,7 +83,7 @@ class Train
 
   # protected
 
-  # attr_writer :route, :current_station
+  # attr_writer :current_station - НЕ ПОМОГАЕТ
 
   private
 
