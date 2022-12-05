@@ -45,8 +45,8 @@ class Train
 
   def take_route(route)
     @route = route
-    @current_station = @route.stations.first
-    @current_station.take_train(self)
+    @current_station = route.stations.first
+    current_station.take_train(self)
   end
 
   def to_next_station
@@ -59,12 +59,12 @@ class Train
 
   def next_station
     condition = route.stations[current_station_index] != route.stations.last
-    route.stations[current_station_index + 1] if condition
+    route.stations[current_station_index + 1] if condition == true
   end
 
   def previous_station
     condition = route.stations[current_station_index] != route.stations.first
-    route.stations[current_station_index - 1] if condition
+    route.stations[current_station_index - 1] if condition == true
   end
 
   def change_current_station(station)
