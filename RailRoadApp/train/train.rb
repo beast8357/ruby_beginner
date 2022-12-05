@@ -81,10 +81,6 @@ class Train
     cars.each.with_index(1) { |car, index| block.call(car, index) }
   end
 
-  # protected
-
-  # attr_writer :current_station - НЕ ПОМОГАЕТ
-
   private
 
   def validate!

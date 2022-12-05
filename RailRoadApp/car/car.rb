@@ -2,7 +2,6 @@ require_relative "../modules/manufacturer"
 
 class Car
   include Manufacturer
-  include InstanceCounter
   attr_reader :type, :seats, :taken_seats, :volume, :occupied_volume
   
   TYPE_FORMAT = /^cargo$|^passenger$/
@@ -14,7 +13,6 @@ class Car
     @volume = volume.to_f
     @occupied_volume = 0.0
     validate!
-    register_instance
   end
 
   def free_seats
