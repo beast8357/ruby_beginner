@@ -1,8 +1,13 @@
+require_relative 'modules/seeds'
+
 class App
+  include Seeds
+
   def initialize
     @stations = {}
     @routes = {}
     @trains = {}
+    load_seeds
   end
 
   def menu
@@ -10,9 +15,9 @@ class App
       actions_list
       prompt
       input = gets.chomp
-      raise "InputError: Empty Input." if input.empty?
+      raise "Empty Input. Retry with an appropriate input." if input.empty?
       input = input.to_i
-      case input
+      case input 
         when 1
           create_station
         when 2
@@ -30,17 +35,21 @@ class App
         when 8
           unhook_car
         when 9
-          move_train(:forward)
+          occupy
         when 10
-          move_train(:back)
+          move_train(:forward)
         when 11
-          route_stations
+          move_train(:back)
         when 12
+          train_cars
+        when 13
+          route_stations
+        when 14
           trains_at_station
-        when 0
+        when 15
           goodbye
         else
-          raise "InputError: Input must be in range 0-12."
+          raise "Input must be a number in range 1-15."
       end
     end
 
@@ -50,6 +59,7 @@ class App
   end
 
   private
+  
   attr_reader :stations, :routes, :trains
 
   def actions_list
@@ -58,16 +68,18 @@ class App
     | 1. Create a station                                          |
     | 2. Create a train                                            |
     | 3. Create a route                                            |
-    | 4. Add a station to the route                                |
-    | 5. Remove a station from the route                           |
-    | 6. Assign a route to the train                               |
-    | 7. Add a car to the train                                    |
-    | 8. Unhook a car from the train                               |
-    | 9. Move the train to the next station                        |
-    | 10. Move the train to the previous station                   |
-    | 11. View the list of stations on the route                   |
-    | 12. View the list of trains at the station                   |
-    | 0. Quit                                                      |
+    | 4. Add a station to a route                                  |
+    | 5. Remove a station from a route                             |
+    | 6. Assign a route to a train                                 |
+    | 7. Add a car to a train                                      |
+    | 8. Unhook the last car from a train                          |
+    | 9. Take a seat or volume in a car                            |
+    | 10. Move a train to the next station                         |
+    | 11. Move a train to the previous station                     |
+    | 12. View the list of train cars                              |
+    | 13. View the list of stations on a route                     |
+    | 14. View the list of trains at a station                     |
+    | 15. Quit                                                     |
     ================================================================
     HEREDOC
     puts list
@@ -79,12 +91,13 @@ class App
     prompt
     station_name = gets.chomp
 
-    raise "InputError: Such station already exists." if
+    raise "Such station already exists." if
           stations.keys.include?(station_name)
 
     stations[station_name] = Station.new(station_name)
+
     status 
-    puts "#{station_name} station has been created!"
+    puts "#{station_name} station has been successfully created!"
 
     rescue StandardError => e
       puts e.message
@@ -103,26 +116,26 @@ class App
       when 2
         type = :cargo
       else
-        raise "InputError: Input must be 1 or 2."
+        raise "Input must be 1 or 2."
     end
 
     puts "Enter the train number " +
           "(Use letters and numbers in the format \'XXX-XX\' or \'XXXXX\')"
     prompt
-    number = gets.chomp
+    train_number = gets.chomp
 
-    raise "InputError: Train with such number already exists." if 
-          trains.keys.include?(number)
+    raise "Train with such number already exists." if 
+          trains.keys.include?(train_number)
 
     case type
       when :passenger
-        trains[number] = PassengerTrain.new(number)
+        trains[train_number] = PassengerTrain.new(train_number)
         status
-        puts "Passenger train #{number} has been created!"
+        puts "Passenger train #{train_number} has been successfully created!"
       when :cargo
-        trains[number] = CargoTrain.new(number)
+        trains[train_number] = CargoTrain.new(train_number)
         status
-        puts "Cargo train #{number} has been created!"
+        puts "Cargo train #{train_number} has been successfully created!"
     end
 
     rescue StandardError => e
@@ -131,207 +144,306 @@ class App
   end
 
   def create_route
-    raise "NotEnoughStationsError: At least 2 stations required." if stations.size < 2
+    raise "At least 2 stations required." if stations.size < 2
 
     show_stations_names
 
-    puts "Enter the starting station name."
+    puts "Choose the starting station (Enter the number)."
     prompt
-    starting_station_name = gets.chomp
-    raise "InputError: No such station." if
-          !stations.keys.include?(starting_station_name)
-    starting_station = stations[starting_station_name]
+    number = gets.chomp.to_i
 
-    puts "Enter the end station name."
+    raise "No such station." unless (1..stations.keys.size).include?(number)
+
+    starting_station = get_station(number)
+    
+
+    puts "Choose the end station (Enter the number)."
     prompt
-    end_station_name = gets.chomp
-    raise "InputError: No such station." if !stations.keys.include?(end_station_name)
-    end_station = stations[end_station_name]
+    number = gets.chomp.to_i
 
-    route_name = "#{starting_station_name}-#{end_station_name}"
+    raise "No such station." unless (1..stations.keys.size).include?(number)
+
+    end_station = get_station(number)
+
+    raise "This station is already the starting station. Choose another station." if
+          end_station == starting_station
+
+    route_name = "#{starting_station.name} - #{end_station.name}"
+
+    raise "Such route already exists." if
+          routes.keys.include?(route_name)
+
     routes[route_name] = Route.new(starting_station, end_station)
+
     status
-    puts "Route <<#{route_name}>> has been created!"
+    puts "Route <<#{route_name}>> has been successfully created!"
 
     rescue StandardError => e
       puts e.message
   end
 
   def add_station
-    raise "NoRoutesError: No routes available." if routes.empty?
+    raise "No routes available." if routes.empty?
 
     show_routes_names
 
-    puts "Enter the name of the route you'd like to add the station to."
+    puts "Choose the route you'd like to add a station to (Enter the number)."
     prompt
-    route_name = gets.chomp
-    raise "InputError: No such route." if !routes.keys.include?(route_name)
-    route = get_route(route_name)
+    number = gets.chomp.to_i
+
+    raise "No such route." unless (1..routes.keys.size).include?(number)
+
+    route = get_route(number)
 
     show_stations_names
 
-    puts "Enter the name of the station you'd like to add."
+    puts "Choose the station you'd like to add (Enter the number)."
     prompt
-    station_name = gets.chomp
-    raise "InputError: No such station." if !stations.keys.include?(station_name)
-    station = get_station(station_name)
+    number = gets.chomp.to_i
 
-    raise "InputError: Such station is alredy in the route." if
+    raise "No such station." unless (1..stations.keys.size).include?(number)
+
+    station = get_station(number)
+
+    raise "Such station is already in the route." if
           route.stations.include?(station)
 
     route.add_station(station)
+
     status
-    puts "#{station_name} station has been added to the route!"
+    puts "#{station.name} station has been successfully added to the route!"
 
     rescue StandardError => e
       puts e.message
   end
 
   def remove_station
-    raise "NoRoutesError: No routes available." if routes.empty?
+    raise "No routes available." if routes.empty?
 
     show_routes_names
 
-    puts "Enter the name of the route you'd like to remove the station from."
+    puts "Choose the route you'd like to remove a station from (Enter the number)."
     prompt
-    route_name = gets.chomp
-    raise "InputError: No such route." if !routes.keys.include?(route_name)
-    route = get_route(route_name)
+    number = gets.chomp.to_i
+
+    raise "No such route." unless (1..routes.keys.size).include?(number)
+
+    route = get_route(number)
+
+    raise "There are only 2 stations on this route." if
+          route.stations.size == 2
 
     show_route_stations(route)
 
-    puts "Enter the name of the station you'd like to remove."
+    puts "Choose the station you'd like to remove (Enter the number)."
     prompt
-    station_name = gets.chomp
-    raise "InputError: No such station." if !stations.keys.include?(station_name)
-    station = get_station(station_name)
+    number = gets.chomp.to_i
 
-    raise "ImpossibleActionError: Routes can't have less than 2 stations." if
-          route.stations.size < 3
+    raise "No such station." unless (1..stations.keys.size).include?(number)
+
+    station = route.stations[number - 1]
+
+    case station
+      when route.stations.first
+        raise "You can't remove the starting station."
+      when route.stations.last
+        raise "You can't remove the end station."
+    end
 
     route.remove_station(station)
+
     status
-    puts "#{station_name} station has been removed from the route!"
+    puts "#{station.name} station has been successfully removed from the route!"
 
     rescue StandardError => e
       puts e.message
   end
 
   def assign_route
-    raise "NoTrainsError: No trains available." if trains.empty?
-    raise "NoRoutesError: No routes available." if routes.empty?
+    raise "No trains available." if trains.empty?
+    raise "No routes available." if routes.empty?
 
     show_trains_numbers
 
-    puts "Enter the number of the train you'd like to assign a route to."
+    puts "Choose the train you'd like to assign a route to (Enter the number)."
     prompt
-    number = gets.chomp
-    raise "InputError: No such train." if !trains.keys.include?(number)
+    number = gets.chomp.to_i
+
+    raise "No such train." unless (1..trains.keys.size).include?(number)
+
     train = get_train(number)
 
     show_routes_names
 
-    puts "Enter the name of the route you'd like to assign to the train."
+    puts "Choose the route you'd like to assign to the train (Enter the number)."
     prompt
-    route_name = gets.chomp
-    raise "InputError: No such route." if !routes.keys.include?(route_name)
-    route = get_route(route_name)
+    number = gets.chomp.to_i
+
+    raise "No such route." unless (1..routes.keys.size).include?(number)
+
+    route = get_route(number)
+
+    starting_station_name = route.stations.first.name
+    end_station_name = route.stations.last.name
 
     train.take_route(route)
+    
     status
-    puts "The route <<#{route_name}>> has been assigned to the train #{number}!"
+    puts "The route <<#{starting_station_name} - #{end_station_name}>> " +
+          "has been successfully assigned to the train #{train.number}!"
 
     rescue StandardError => e
       puts e.message
   end
 
   def add_car
-    raise "NoTrainsError: No trains available." if trains.empty?
+    raise "No trains available." if trains.empty?
 
     show_trains_numbers
 
-    puts "Enter the number of the train you'd like to add a car to."
+    puts "Choose the train you'd like to add a car to (Enter the number)."
     prompt
-    number = gets.chomp
-    raise "InputError: No such train." if !trains.keys.include?(number)
+    number = gets.chomp.to_i
+
+    raise "No such train." unless (1..trains.keys.size).include?(number)
+
     train = get_train(number)
 
-    puts "What type of car would you like to create?\n" +
-        "Enter 1 to make it passenger;\n" +
-        "Enter 2 to make it cargo.";
-    prompt
-    type = gets.chomp.to_i
+    case train.type
+      when :passenger
+        puts "Enter the number of seats in the car."
+        prompt
+        seats = gets.chomp.to_i
 
-    case type
-      when 1
-        car = PassengerCar.new
-      when 2
-        car = CargoCar.new
+        raise "Input must be 0 or above." if seats < 0
+
+        car = PassengerCar.new(seats)
+      when :cargo
+        puts "Enter the car's volume."
+        prompt
+        volume = gets.chomp.to_f
+
+        raise "Input must be 0 or above." if volume < 0
+
+        car = CargoCar.new(volume)
       else
-        raise "InputError: Input must be 1 or 2."
+        raise "Input must be 1 or 2."
     end
 
-    raise "TypesIncompatibilityError: The types of car and train are different." if
-          car.type != train.type
-
     train.add_car(car)
-    car_adding_success_message
+
+    status
+    puts "The car has been successfully added!"
 
     rescue StandardError => e
       puts e.message
   end
 
   def unhook_car
-    raise "NoTrainsError: No trains available." if trains.empty?
+    raise "No trains available." if trains.empty?
 
     show_trains_numbers
 
-    puts "Enter the number of the train you'd like to unhook a car from."
+    puts "Choose the train you'd like to unhook the last car from (Enter the number)."
     prompt
-    number = gets.chomp
-    raise "InputError: No such train." if !trains.keys.include?(number)
+    number = gets.chomp.to_i
+
+    raise "No such train." unless (1..trains.keys.size).include?(number)
+
     train = get_train(number)
 
-    raise "NoCarsError: No cars to unhook." if train.cars.empty?
+    raise "No cars to unhook." if train.cars.empty?
 
     train.unhook_car
+
     status
-    puts "The car has been unhooked!"
+    puts "The car has been successfully unhooked!"
+
+    rescue StandardError => e
+      puts e.message
+  end
+
+  def occupy
+    raise "No trains available." if trains.empty?
+
+    show_trains_numbers
+
+    puts "Choose the train (Enter the number)."
+    prompt
+    number = gets.chomp.to_i
+
+    raise "No such train." unless (1..trains.keys.size).include?(number)
+
+    train = get_train(number)
+
+    raise "This train has no cars." if train.cars.empty?
+
+    show_train_cars(train)
+
+    puts "Choose the car (Enter the number)."
+    prompt
+    car_number = gets.chomp.to_i
+
+    raise "No such car." unless (1..train.cars.size).include?(car_number)
+
+    car = train.cars[car_number - 1]
+
+    case car.type
+      when :passenger
+        car.take_seat
+        status
+        puts "A seat has been successfully taken!"
+      when :cargo
+        puts "Enter the volume you'd like to occupy."
+        prompt
+        volume = gets.chomp.to_f
+        car.occupy_volume(volume)
+        status
+        puts "The volume has been successfully occupied!"
+    end
 
     rescue StandardError => e
       puts e.message
   end
 
   def move_train(direction)
-    raise "NoTrainsError: No trains available." if trains.empty?
-    raise "NoRoutesError: No routes available." if routes.empty?
+    raise "No trains available." if trains.empty?
+    raise "No routes available." if routes.empty?
 
     show_trains_numbers
 
     case direction
       when :forward
-        puts "Enter the number of the train you'd like to move forward."
+        puts "Choose the train you'd like to move forward (Enter the number)."
         prompt
-        number = gets.chomp
-        raise "InputError: No such train." if !trains.keys.include?(number)
+        number = gets.chomp.to_i
+
+        raise "No such train." unless (1..trains.keys.size).include?(number)
+
         train = get_train(number)
 
-        raise "MovementError: The train is at the end station." if
-              train.next_station.nil?
+        raise "The train is already at the end station." if
+              train.current_station == train.route.stations.last
         
         train.to_next_station
+
+        status
         arrival_message(train)
       when :back
-        puts "Enter the number of the train you'd like to move back."
+        puts "Choose the train you'd like to move back (Enter the number)."
         prompt
-        number = gets.chomp
-        raise "InputError: No such train." if !trains.keys.include?(number)
+        number = gets.chomp.to_i
+
+        raise "No such train." unless (1..trains.keys.size).include?(number)
+
         train = get_train(number)
 
-        raise "MovementError: The train is at the starting station." if
-              train.previous_station.nil?
+        raise "The train is already at the starting station." if
+              train.current_station == train.route.stations.first
 
         train.to_previous_station
+
+        status
         arrival_message(train)
     end
 
@@ -339,34 +451,81 @@ class App
       puts e.message
   end
   
+  def train_cars
+    raise "No trains available." if trains.empty?
+
+    show_trains_numbers
+
+    puts "Choose the train (Enter the number)."
+    prompt
+    number = gets.chomp.to_i
+
+    raise "No such train." unless (1..trains.keys.size).include?(number)
+
+    train = get_train(number)
+
+    raise "This train has no cars." if train.cars.empty?
+
+    show_train_cars(train)
+
+    rescue StandardError => e
+      puts e.message
+  end
+
+  def show_train_cars(train)
+    train.each_car do |car, index|
+      print "Number: #{index}, Type: #{car.type.to_s.capitalize!}, "
+
+      case train.type
+        when :passenger
+          puts "Free seats: #{car.free_volume.to_i}, " +
+                "Seats taken: #{car.occupied_volume.to_i}"
+        when :cargo
+          puts "Unoccupied volume: #{car.free_volume}, " +
+                "Volume occupied: #{car.occupied_volume}"
+      end
+    end
+  end
+
   def route_stations
-    raise "NoRoutesError: No routes available." if routes.empty?
+    raise "No routes available." if routes.empty?
 
     show_routes_names
 
-    puts "Enter the name of the route."
+    puts "Choose the route (Enter the number)."
     prompt
-    route_name = gets.chomp
-    raise "InputError: No such route." if !routes.keys.include?(route_name)
-    route = get_route(route_name)
+    number = gets.chomp.to_i
 
+    raise "No such route." unless (1..routes.keys.size).include?(number)
+
+    route = get_route(number)
+
+    puts "Stations on this route:"
     show_route_stations(route)
 
     rescue StandardError => e
       puts e.message
   end
 
+  def show_route_stations(route)
+    route.each_station { |station, index| puts "#{index}. #{station.name}" }
+  end
+
   def trains_at_station
-    raise "NoTrainsError: No trains available." if trains.empty?
-    raise "NoStationsError: No stations available." if stations.empty?
+    raise "No trains available." if trains.empty?
+    raise "No stations available." if stations.empty?
 
     show_stations_names
 
-    puts "Enter the name of the station."
+    puts "Choose the station (Enter the number)."
     prompt
-    station_name = gets.chomp
-    raise "InputError: No such station." if !stations.keys.include?(station_name)
-    station = get_station(station_name)
+    number = gets.chomp.to_i
+
+    raise "No such station." unless (1..stations.keys.size).include?(number)
+
+    station = get_station(number)
+
+    raise "No trains on this station." if station.trains.empty?
 
     show_trains_at_station(station)
 
@@ -374,18 +533,16 @@ class App
       puts e.message
   end
 
-  def show_route_stations(route)
-    stations_list = route.stations
-    puts "Current route stations:"
-    stations_list.each.with_index(1) do |station, index|
-      puts "#{index}. #{station.name}"
+  def show_trains_at_station(station)
+    station.each_train do |train|
+      puts "Number: #{train.number}, " +
+            "Type: #{train.type.to_s.capitalize!}, " +
+            "Cars amount: #{train.cars.size}"
     end
   end
 
-  def show_trains_at_station(station)
-    trains_list = station.trains
-    puts "Trains at this station:"
-    trains_list.each.with_index(1) do |train, index|
+  def show_trains_numbers
+    trains.values.each.with_index(1) do |train, index|
       puts "#{index}. #{train.number}"
     end
   end
@@ -396,38 +553,26 @@ class App
     end
   end
 
-  def show_trains_numbers
-    trains.values.each.with_index(1) do |train, index|
-      puts "#{index}. #{train.number}"
-    end
-  end
-
   def show_stations_names
     stations.values.each.with_index(1) do |station, index|
       puts "#{index}. #{station.name}"
     end
   end
 
-  def get_station(station_name)
-    stations[station_name]
+  def get_station(number)
+    stations[stations.keys[number - 1]]
   end
 
-  def get_route(route_name)
-    routes[route_name]
+  def get_route(number)
+    routes[routes.keys[number - 1]]
   end
 
   def get_train(number)
-    trains[number]
-  end
-
-  def car_adding_success_message
-    status
-    puts "The car has been added to the train!"
+    trains[trains.keys[number - 1]]
   end
 
   def arrival_message(train)
-    status
-    puts "The train has arrived at #{train.current_station.name} station!"
+    puts "The train has successfully arrived at #{train.current_station.name} station!"
   end
 
   def status

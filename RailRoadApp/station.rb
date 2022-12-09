@@ -2,25 +2,24 @@ require_relative "modules/instance_counter"
 
 class Station
   include InstanceCounter
+  attr_reader :name, :trains, :train_types, :stations
 
   NAME_FORMAT = /\A([a-z\d]+([[:space:]]){1}[a-z\d]+)\Z|\A([a-z\d]+)\Z/i
 
   @@stations = []
 
   def self.all
-    @@stations.each do |station|
+    stations.each do |station|
       station
     end
   end
 
-  attr_reader :name, :trains, :train_types, :stations
-
-  def initialize(name)
+  def initialize(name = nil)
     @name = name
-    validate!
     @trains = []
     @train_types = Hash.new(0)
     @@stations << self
+    validate!
     register_instance
   end
 
@@ -39,9 +38,14 @@ class Station
     end
   end
 
+  def each_train(&block)
+    raise "No block given." unless block_given?
+    trains.each.with_index(1) { |train| block.call(train) }
+  end
+
   private
+  
   def validate!
-    raise "InputError: Empty station name." if @name.empty?
-    raise "InputError: Invalid name format." if @name !~ NAME_FORMAT
+    raise "Invalid name format." if name !~ NAME_FORMAT
   end
 end

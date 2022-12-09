@@ -24,8 +24,14 @@ class Route
     end
   end
 
+  def each_station(&block)
+    raise "No block given." unless block_given?
+    stations.each.with_index(1) { |station, index| block.call(station, index) }
+  end
+
   private
+  
   def validate!
-    raise "NotEnoughStationsError: At least 2 stations required." if stations.size < 2
+    raise "At least 2 stations required." if stations.size < 2
   end
 end

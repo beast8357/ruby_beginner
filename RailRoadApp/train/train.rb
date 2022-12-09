@@ -4,6 +4,10 @@ require_relative "../modules/instance_counter"
 class Train
   include Manufacturer
   include InstanceCounter
+  attr_reader :number, :type, :speed, :cars, :trains, :route, :current_station
+
+  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
+  TYPE_FORMAT = /^cargo$|^passenger$/
 
   @@trains = {}
 
@@ -11,19 +15,13 @@ class Train
     trains[number]
   end
 
-  attr_reader :number, :type, :speed, :cars, :trains, 
-              :route, :current_station
-
-  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
-  TYPE_FORMAT = /^cargo$|^passenger$/
-
-  def initialize(number, type = nil)
+  def initialize(number = nil, type = nil)
     @number = number
     @type = type
-    validate!
     @speed = 0
     @cars = []
     @@trains[number] = self
+    validate!
     register_instance
   end
 
@@ -44,10 +42,10 @@ class Train
     cars.pop if speed == 0 && cars.size > 0
   end
 
-  def take_route(route)
-    @route = route
-    @current_station = @route.stations.first
-    @current_station.take_train(self)
+  def take_route(route_to_take)
+    self.route = route_to_take
+    self.current_station = route.stations.first
+    current_station.take_train(self)
   end
 
   def to_next_station
@@ -60,29 +58,37 @@ class Train
 
   def next_station
     condition = route.stations[current_station_index] != route.stations.last
-    route.stations[current_station_index + 1] if condition
+    route.stations[current_station_index + 1] if condition == true
   end
 
   def previous_station
     condition = route.stations[current_station_index] != route.stations.first
-    route.stations[current_station_index - 1] if condition
+    route.stations[current_station_index - 1] if condition == true
   end
 
   def change_current_station(station)
-    @current_station.send_train(self)
-    @current_station = station
-    @current_station.take_train(self)
+    current_station.send_train(self)
+    self.current_station = station
+    current_station.take_train(self)
   end
 
   def current_station_index
     route.stations.index(current_station)
   end
 
+  def each_car(&block)
+    raise "No block given." unless block_given?
+    cars.each.with_index(1) { |car, index| block.call(car, index) }
+  end
+
+  protected
+
+  attr_writer :route, :current_station
+
   private
+
   def validate!
-    raise "InputError: Invalid number format." if @number !~ NUMBER_FORMAT
-    raise "TypeError: Nil type." if @type.nil?
-    raise "TypeError: Type must be \'cargo\' or \'passenger\'." if
-          @type.to_s !~ TYPE_FORMAT
+    raise "Invalid number format." if number !~ NUMBER_FORMAT
+    raise "Type must be \'cargo\' or \'passenger\'." if type.to_s !~ TYPE_FORMAT
   end
 end

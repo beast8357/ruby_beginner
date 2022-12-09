@@ -1,7 +1,11 @@
 class PassengerCar < Car
-  attr_reader :type
+  
+  def initialize(seats)
+    super(:passenger, seats)
+  end
 
-  def initialize
-    super(:passenger)
+  def take_seat
+    raise "No more free seats!" if free_volume.zero?
+    self.occupied_volume += 1
   end
 end
