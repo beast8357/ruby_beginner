@@ -6,7 +6,7 @@ class Car
   
   TYPE_FORMAT = /^cargo$|^passenger$/
 
-  def initialize(type = nil, volume = nil)
+  def initialize(type = nil, volume)
     @type = type
     @volume = volume.to_f
     @occupied_volume = 0.0
