@@ -1,7 +1,7 @@
 class CargoCar < Car
 
   def initialize(volume)
-    super(:cargo, nil, volume)
+    super(:cargo, volume)
   end
 
   def occupy_volume(value)

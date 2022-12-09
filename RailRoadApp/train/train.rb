@@ -42,9 +42,9 @@ class Train
     cars.pop if speed == 0 && cars.size > 0
   end
 
-  def take_route(route)
-    @route = route
-    @current_station = route.stations.first
+  def take_route(route_to_take)
+    self.route = route_to_take
+    self.current_station = route.stations.first
     current_station.take_train(self)
   end
 
@@ -68,7 +68,7 @@ class Train
 
   def change_current_station(station)
     current_station.send_train(self)
-    @current_station = station
+    self.current_station = station
     current_station.take_train(self)
   end
 
@@ -80,6 +80,10 @@ class Train
     raise "No block given." unless block_given?
     cars.each.with_index(1) { |car, index| block.call(car, index) }
   end
+
+  protected
+
+  attr_writer :route, :current_station
 
   private
 

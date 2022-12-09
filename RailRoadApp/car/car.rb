@@ -2,21 +2,15 @@ require_relative "../modules/manufacturer"
 
 class Car
   include Manufacturer
-  attr_reader :type, :seats, :taken_seats, :volume, :occupied_volume
+  attr_reader :type, :volume, :occupied_volume
   
   TYPE_FORMAT = /^cargo$|^passenger$/
 
-  def initialize(type = nil, seats = 0, volume = 0.0)
+  def initialize(type = nil, volume = nil)
     @type = type
-    @seats = seats.to_i
-    @taken_seats = 0
     @volume = volume.to_f
     @occupied_volume = 0.0
     validate!
-  end
-
-  def free_seats
-    seats - taken_seats
   end
 
   def free_volume
@@ -25,7 +19,7 @@ class Car
 
   protected
 
-  attr_writer :taken_seats, :occupied_volume
+  attr_writer :occupied_volume
   
   private
 

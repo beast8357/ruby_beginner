@@ -1,11 +1,11 @@
 class PassengerCar < Car
   
   def initialize(seats)
-    super(:passenger, seats, nil)
+    super(:passenger, seats)
   end
 
-  def take_seats(value)
-    raise "Your value is too big!" if value > free_seats
-    self.taken_seats += value
+  def take_seat
+    raise "No more free seats!" if free_volume.zero?
+    self.occupied_volume += 1
   end
 end
