@@ -1,45 +1,50 @@
-require_relative "../modules/manufacturer"
-require_relative "../modules/instance_counter"
+require_relative '../modules/manufacturer'
+require_relative '../modules/instance_counter'
 
 class Train
   include Manufacturer
   include InstanceCounter
-  attr_reader :number, :type, :speed, :cars, :trains, :route, :current_station
 
   NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
   TYPE_FORMAT = /^cargo$|^passenger$/
 
   @@trains = {}
 
+  attr_reader :number, :type, :speed, :cars, :route, :current_station
+
   def self.find(number)
-    trains[number]
+    @@trains[number]
   end
 
-  def initialize(number = nil, type = nil)
-    @number = number
-    @type = type
+  def initialize(options = {})
+    @number = options[:number]
+    @type = options[:type]
+    validate!
     @speed = 0
     @cars = []
     @@trains[number] = self
-    validate!
     register_instance
   end
 
   def gain_speed(value)
-    speed += value
+    speed + value
   end
 
   def brake(value)
-    speed -= value
-    speed = 0 if speed < 0
+    speed =
+      if (speed - value).negative?
+        0
+      else
+        speed - value
+      end
   end
 
   def add_car(car)
-    cars << car if speed == 0 && car.type == type
+    cars << car if speed.zero? && car.type == type
   end
 
   def unhook_car
-    cars.pop if speed == 0 && cars.size > 0
+    cars.pop if speed.zero? && !cars.size.empty
   end
 
   def take_route(route_to_take)
@@ -50,7 +55,7 @@ class Train
 
   def to_next_station
     change_current_station(next_station)
-  end  
+  end
 
   def to_previous_station
     change_current_station(previous_station)
@@ -77,7 +82,8 @@ class Train
   end
 
   def each_car(&block)
-    raise "No block given." unless block_given?
+    raise 'No block given.' unless block_given?
+
     cars.each.with_index(1) { |car, index| block.call(car, index) }
   end
 
@@ -88,7 +94,7 @@ class Train
   private
 
   def validate!
-    raise "Invalid number format." if number !~ NUMBER_FORMAT
+    raise 'Invalid number format.' if number !~ NUMBER_FORMAT
     raise "Type must be \'cargo\' or \'passenger\'." if type.to_s !~ TYPE_FORMAT
   end
 end

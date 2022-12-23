@@ -8,4 +8,4 @@ require_relative 'station'
 require_relative 'route'
 require_relative 'app'
 
-App.new.menu
+App.new.start
