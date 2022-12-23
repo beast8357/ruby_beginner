@@ -1,6 +1,6 @@
 class PassengerCar < Car
   def initialize(seats)
-    super(type: :passenger, seats: seats)
+    super(type: :passenger, volume: seats)
   end
 
   def take_seat

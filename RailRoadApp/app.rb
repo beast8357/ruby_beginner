@@ -74,6 +74,8 @@ class App
 
 #=====================================================================================#
   def create_route
+    raise "Less than 2 stations created." if stations.size < 2
+
     display_stations_names
     puts 'Choose the starting station (Enter the number).'
     starting_station = select_station
@@ -84,8 +86,7 @@ class App
 
   def set_name_and_create(starting_station, end_station)
     route_name = "#{starting_station.name} - #{end_station.name}"
-    raise 'Such route already exists.' if
-          routes.keys.include?(route_name)
+    raise 'Such route already exists.' if routes.keys.include?(route_name)
 
     route_args = { starting_station: starting_station, end_station: end_station }
     routes[route_name] = Route.new(route_args)
@@ -95,6 +96,8 @@ class App
 
 #######################################################################################
   def add_station
+    raise "No routes available." if routes.empty?
+
     display_routes_names
     puts "Choose the route you'd like to add a station to (Enter the number)."
     route = select_route
@@ -110,6 +113,8 @@ class App
 
 #=====================================================================================#
   def remove_station
+    raise "No routes available." if routes.empty?
+
     display_routes_names
     puts "Choose the route you'd like to remove a station from (Enter the number)."
     route = select_route
@@ -141,6 +146,9 @@ class App
 
 #######################################################################################
   def assign_route
+    raise "No trains available." if trains.empty?
+    raise "No routes available." if routes.empty?
+
     display_trains_numbers
     puts "Choose the train you'd like to assign a route to (Enter the number)."
     train = select_train
@@ -161,6 +169,8 @@ class App
 
 #=====================================================================================#
   def add_car
+    raise "No trains available." if trains.empty?
+
     display_trains_numbers
     puts "Choose the train you'd like to add a car to (Enter the number)."
     train = select_train
@@ -184,19 +194,17 @@ class App
 
   def set_seats_number
     puts 'Enter the number of seats in the car.'
-    input = gets.chomp.to_i
-    raise 'Input must be 1 or above.' if input.zero?
-
-    input
-  rescue => e
-    puts e.message
-    retry
+    get_input_and_check
   end
 
   def set_volume
     puts "Enter the car's volume."
+    get_input_and_check
+  end
+
+  def get_input_and_check
     input = gets.chomp.to_f
-    raise 'Input must be 1 or above.' if input.zero?
+    raise 'Input must be 1 or above.' if input.zero? || input.negative?
 
     input
   rescue => e
@@ -207,6 +215,8 @@ class App
 
 #######################################################################################
   def unhook_car
+    raise "No trains available." if trains.empty?
+
     display_trains_numbers
     puts "Choose the train you'd like to unhook the last car from (Enter the number)."
     train = select_train
@@ -219,6 +229,8 @@ class App
 
 #=====================================================================================#
   def occupy
+    raise "No trains available." if trains.empty?
+
     display_trains_numbers
     puts 'Choose the train (Enter the number).'
     train = select_train
@@ -226,7 +238,7 @@ class App
 
     display_train_cars(train)
     puts 'Choose the car (Enter the number).'
-    car = select_car
+    car = select_car(train)
     take_seat_or_occupy_volume(car)
   end
 
@@ -261,22 +273,27 @@ class App
   end
 
   def move_train(direction)
+    raise "No trains available." if trains.empty?
+    raise "No routes available." if routes.empty?
+
+    display_trains_numbers
     display_movement_options(direction)
     train = select_train
+    raise "No route has been assigned to this train." if train.current_station.nil?
+
     forward(train) if direction == :forward
     backwards(train) if direction == :backwards
-    puts 'The train has successfully arrived at' \
+    puts 'The train has successfully arrived at ' \
           "#{train.current_station.name} station!"
   end
 
   def display_movement_options(direction)
-    display_trains_numbers
-    case direction
-    when :forward
-      puts "Choose the train you'd like to move forward (Enter the number)."
-    when :backwards
-      puts "Choose the train you'd like to move backwards (Enter the number)."
-    end
+    where(:forward) if direction == :forward
+    where(:backwards) if direction == :backwards
+  end
+
+  def where(direction)
+    puts "Choose the train you'd like to move #{direction} (Enter the number)."
   end
 
   def forward(train)
@@ -325,6 +342,8 @@ class App
 
 #######################################################################################
   def route_stations
+    raise "No routes available." if routes.empty?
+
     display_routes_names
     puts 'Choose the route (Enter the number).'
     route = select_route
@@ -339,6 +358,9 @@ class App
 
 #=====================================================================================#
   def trains_at_station
+    raise "No trains available." if trains.empty?
+    raise "No stations available." if stations.empty?
+
     display_stations_names
     puts 'Choose the station (Enter the number).'
     station = select_station
@@ -349,9 +371,6 @@ class App
 
   def display_trains_at_station(station)
     station.each_train { |train| puts train_characteristics(train) }
-    # station.each_train do |train|
-    #   puts train_characteristics(train)
-    # end
   end
 
   def train_characteristics(train)
