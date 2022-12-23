@@ -3,7 +3,7 @@ require_relative '../modules/manufacturer'
 class Car
   include Manufacturer
 
-  TYPE_FORMAT = /^cargo$|^passenger$/.freeze
+  TYPE_FORMAT = /^cargo$|^passenger$/
 
   attr_reader :type, :volume, :occupied_volume
 

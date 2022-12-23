@@ -5,8 +5,8 @@ class Train
   include Manufacturer
   include InstanceCounter
 
-  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i.freeze
-  TYPE_FORMAT = /^cargo$|^passenger$/.freeze
+  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
+  TYPE_FORMAT = /^cargo$|^passenger$/
 
   @@trains = {}
 
@@ -31,8 +31,12 @@ class Train
   end
 
   def brake(value)
-    speed -= value
-    speed = 0 if speed.negative?
+    speed =
+      if (speed - value).negative?
+        0
+      else
+        speed - value
+      end
   end
 
   def add_car(car)

@@ -16,7 +16,7 @@ class App
     loop do
       display_menu
       input = gets.chomp.to_i
-      raise 'Invalid input.' unless (1..15).include?(input)
+      raise 'Invalid input.' unless (1..15).cover?(input)
 
       item = MENU[input - 1]
       send(item[:action])
@@ -51,7 +51,7 @@ class App
     puts "To create a passenger train, enter 1.\n" \
          'To create a cargo train, enter 2.'
     input = gets.chomp.to_i
-    raise 'Input must be 1 or 2.' unless (1..2).include?(input)
+    raise 'Input must be 1 or 2.' unless (1..2).cover?(input)
 
     return :passenger if input == 1
     return :cargo if input == 2
@@ -120,7 +120,7 @@ class App
 
   def select_station_to_remove(route)
     input = gets.chomp.to_i
-    raise 'No such station.' unless (1..route.stations.size).include?(input)
+    raise 'No such station.' unless (1..route.stations.size).cover?(input)
 
     route.stations[input - 1]
   end
@@ -183,15 +183,15 @@ class App
 
   def set_seats_number
     puts 'Enter the number of seats in the car.'
-    get_input_and_check
+    car_volume
   end
 
   def set_volume
     puts "Enter the car's volume."
-    get_input_and_check
+    car_volume
   end
 
-  def get_input_and_check
+  def car_volume
     input = gets.chomp.to_f
     raise 'Input must be 1 or above.' if input.zero? || input.negative?
 

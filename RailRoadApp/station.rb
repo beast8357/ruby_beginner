@@ -3,7 +3,7 @@ require_relative 'modules/instance_counter'
 class Station
   include InstanceCounter
 
-  NAME_FORMAT = /^([a-z\d]+([[:space:]]){1}[a-z\d]+)$|^([a-z\d]+)$/i.freeze
+  NAME_FORMAT = /^([a-z\d]+([[:space:]]){1}[a-z\d]+)$|^([a-z\d]+)$/i
 
   @stations = []
 
