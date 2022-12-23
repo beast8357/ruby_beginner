@@ -244,7 +244,7 @@ class App
 
   def select_car(train)
     car_number = gets.chomp.to_i
-    raise 'No such car.' unless (1..train.cars.size).include?(car_number)
+    raise 'No such car.' unless (1..train.cars.size).cover?(car_number)
 
     train.cars[car_number - 1]
   end
@@ -400,21 +400,21 @@ class App
 
   def select_train
     input = gets.chomp.to_i
-    raise 'No such train.' unless (1..trains.keys.size).include?(input)
+    raise 'No such train.' unless (1..trains.keys.size).cover?(input)
 
     get_train(input)
   end
 
   def select_route
     input = gets.chomp.to_i
-    raise 'No such route.' unless (1..routes.keys.size).include?(input)
+    raise 'No such route.' unless (1..routes.keys.size).cover?(input)
 
     get_route(input)
   end
 
   def select_station
     input = gets.chomp.to_i
-    raise 'No such station.' unless (1..stations.keys.size).include?(input)
+    raise 'No such station.' unless (1..stations.keys.size).cover?(input)
 
     get_station(input)
   end
