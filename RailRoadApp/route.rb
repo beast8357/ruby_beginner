@@ -1,11 +1,15 @@
-require_relative "modules/instance_counter"
+require_relative 'modules/instance_counter'
 
 class Route
   include InstanceCounter
+
   attr_reader :stations
 
-  def initialize(starting_station, end_station)
-    @stations = [starting_station, end_station]
+  def initialize(options = {})
+    @stations = [
+      options[:starting_station] || nil,
+      options[:end_station] || nil
+    ]
     validate!
     register_instance
   end
@@ -25,13 +29,15 @@ class Route
   end
 
   def each_station(&block)
-    raise "No block given." unless block_given?
+    raise 'No block given.' unless block_given?
+
     stations.each.with_index(1) { |station, index| block.call(station, index) }
   end
 
   private
-  
+
   def validate!
-    raise "At least 2 stations required." if stations.size < 2
+    raise 'At least 2 stations required.' if
+    stations.size < 2 || stations[0].nil? || stations[1].nil?
   end
 end

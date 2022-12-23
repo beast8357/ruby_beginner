@@ -12,7 +12,7 @@ module InstanceCounter
     end
   end
 
-  module InstanceMethods 
+  module InstanceMethods
     private
 
     def register_instance

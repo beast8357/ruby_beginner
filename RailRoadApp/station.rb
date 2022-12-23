@@ -1,25 +1,28 @@
-require_relative "modules/instance_counter"
+require_relative 'modules/instance_counter'
 
 class Station
   include InstanceCounter
-  attr_reader :name, :trains, :train_types, :stations
 
-  NAME_FORMAT = /\A([a-z\d]+([[:space:]]){1}[a-z\d]+)\Z|\A([a-z\d]+)\Z/i
+  NAME_FORMAT = /^([a-z\d]+([[:space:]]){1}[a-z\d]+)$|^([a-z\d]+)$/i.freeze
 
-  @@stations = []
+  @stations = []
 
-  def self.all
-    stations.each do |station|
-      station
-    end
+  class << self
+    attr_accessor :stations
   end
 
-  def initialize(name = nil)
+  attr_reader :name, :trains, :trains_types
+
+  def self.all
+    self.class.stations.each { |station| station }
+  end
+
+  def initialize(name)
     @name = name
-    @trains = []
-    @train_types = Hash.new(0)
-    @@stations << self
     validate!
+    @trains = []
+    @trains_types = Hash.new(0)
+    self.class.stations << self
     register_instance
   end
 
@@ -31,21 +34,22 @@ class Station
     trains.delete(train)
   end
 
-  def train_types
-    train_types.clear
+  def fill_trains_types
+    trains_types.clear
     trains.each do |train|
-      train_types[train.type] += 1
+      trains_types[train.type] += 1
     end
   end
 
   def each_train(&block)
-    raise "No block given." unless block_given?
-    trains.each.with_index(1) { |train| block.call(train) }
+    raise 'No block given.' unless block_given?
+
+    trains.each { |train| block.call(train) }
   end
 
   private
-  
+
   def validate!
-    raise "Invalid name format." if name !~ NAME_FORMAT
+    raise 'Invalid name format.' if name !~ NAME_FORMAT
   end
 end
