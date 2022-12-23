@@ -39,7 +39,6 @@ class App
     puts "#{name} station has been successfully created!"
   end
 
-#######################################################################################
   def create_train
     type = set_train_type
     number = set_train_number
@@ -70,9 +69,7 @@ class App
 
     number
   end
-#######################################################################################
 
-#=====================================================================================#
   def create_route
     raise "Less than 2 stations created." if stations.size < 2
 
@@ -92,9 +89,7 @@ class App
     routes[route_name] = Route.new(route_args)
     puts "Route <<#{route_name}>> has been successfully created!"
   end
-#=====================================================================================#
 
-#######################################################################################
   def add_station
     raise "No routes available." if routes.empty?
 
@@ -109,9 +104,7 @@ class App
     route.add_station(station)
     puts "#{station.name} station has been successfully added to the route!"
   end
-#######################################################################################
 
-#=====================================================================================#
   def remove_station
     raise "No routes available." if routes.empty?
 
@@ -142,9 +135,7 @@ class App
       true
     end
   end
-#=====================================================================================#
 
-#######################################################################################
   def assign_route
     raise "No trains available." if trains.empty?
     raise "No routes available." if routes.empty?
@@ -165,9 +156,7 @@ class App
     puts "The route <<#{starting_station_name} - #{end_station_name}>> " \
           "has been successfully assigned to the train #{train.number}!"
   end
-#######################################################################################
 
-#=====================================================================================#
   def add_car
     raise "No trains available." if trains.empty?
 
@@ -211,9 +200,7 @@ class App
     puts e.message
     retry
   end
-#=====================================================================================#
 
-#######################################################################################
   def unhook_car
     raise "No trains available." if trains.empty?
 
@@ -225,9 +212,7 @@ class App
     train.unhook_car
     puts 'The car has been successfully unhooked!'
   end
-#######################################################################################
 
-#=====================================================================================#
   def occupy
     raise "No trains available." if trains.empty?
 
@@ -261,9 +246,7 @@ class App
       puts 'The volume has been successfully occupied!'
     end
   end
-#=====================================================================================#
 
-#######################################################################################
   def move_train_forward
     move_train(:forward)
   end
@@ -309,9 +292,7 @@ class App
 
     train.to_previous_station
   end
-#######################################################################################
 
-#=====================================================================================#
   def train_cars
     raise 'No trains available.' if trains.empty?
 
@@ -338,9 +319,7 @@ class App
             "Volume occupied: #{car.occupied_volume}"
     end
   end
-#=====================================================================================#
 
-#######################################################################################
   def route_stations
     raise "No routes available." if routes.empty?
 
@@ -354,9 +333,7 @@ class App
   def display_route_stations(route)
     route.each_station { |station, index| puts "#{index}. #{station.name}" }
   end
-#######################################################################################
 
-#=====================================================================================#
   def trains_at_station
     raise "No trains available." if trains.empty?
     raise "No stations available." if stations.empty?
@@ -378,7 +355,6 @@ class App
     "Type: #{train.type.to_s.capitalize!}, " \
     "Cars amount: #{train.cars.size}"
   end
-#=====================================================================================#
 
   def display_trains_numbers
     trains.each_value.with_index(1) do |train, index|
