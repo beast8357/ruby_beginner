@@ -1,9 +1,8 @@
 require_relative '../modules/manufacturer'
+require_relative '../validators/car_validator'
 
 class Car
   include Manufacturer
-
-  TYPE_FORMAT = /^cargo$|^passenger$/
 
   attr_reader :type, :volume, :occupied_volume
 
@@ -11,7 +10,7 @@ class Car
     @type = options[:type]
     @volume = options[:volume].to_f || 0.0
     @occupied_volume = 0.0
-    validate!
+    CarValidator.new(type: type).valid?
   end
 
   def free_volume
@@ -21,10 +20,4 @@ class Car
   protected
 
   attr_writer :occupied_volume
-
-  private
-
-  def validate!
-    raise "Type must be \'cargo\' or \'passenger\'." if type.to_s !~ TYPE_FORMAT
-  end
 end
