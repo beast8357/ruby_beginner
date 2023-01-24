@@ -39,6 +39,6 @@ end
 # class Test
 #   include Accessors
 
-#   attr_accessor_with_history :ass, :boobs
-#   strong_attr_accessor :soul, String
+#   attr_accessor_with_history :peep, :boop
+#   strong_attr_accessor :poetry, String
 # end
