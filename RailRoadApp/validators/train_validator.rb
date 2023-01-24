@@ -12,4 +12,3 @@ class TrainValidator
 end
 
 # t = TrainValidator.new(number: "qwe12", type: :cargo)
-# t.valid?
