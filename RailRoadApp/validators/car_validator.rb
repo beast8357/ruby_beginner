@@ -9,4 +9,3 @@ class CarValidator
 end
 
 # t = CarValidator.new(type: :cargo)
-# t.valid?

@@ -11,4 +11,3 @@ class StationValidator
 end
 
 # t = StationValidator.new(name: "s1")
-# t.valid?
