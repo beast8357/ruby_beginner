@@ -1,12 +1,10 @@
 require_relative '../modules/manufacturer'
 require_relative '../modules/instance_counter'
+require_relative '../validators/train_validator'
 
 class Train
   include Manufacturer
   include InstanceCounter
-
-  NUMBER_FORMAT = /^[a-z\d]{3}-?[a-z\d]{2}$/i
-  TYPE_FORMAT = /^cargo$|^passenger$/
 
   @@trains = {}
 
@@ -19,11 +17,10 @@ class Train
   def initialize(options = {})
     @number = options[:number]
     @type = options[:type]
-    validate!
     @speed = 0
     @cars = []
     @@trains[number] = self
-    register_instance
+    register_instance if TrainValidator.new(number: number, type: type).valid?
   end
 
   def gain_speed(value)
@@ -90,11 +87,4 @@ class Train
   protected
 
   attr_writer :route, :current_station
-
-  private
-
-  def validate!
-    raise 'Invalid number format.' if number !~ NUMBER_FORMAT
-    raise "Type must be \'cargo\' or \'passenger\'." if type.to_s !~ TYPE_FORMAT
-  end
 end

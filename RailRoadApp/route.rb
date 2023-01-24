@@ -10,7 +10,8 @@ class Route
       options[:starting_station] || nil,
       options[:end_station] || nil
     ]
-    validate!
+    raise '2 stations required.' if stations.first.nil? || stations.last.nil?
+    
     register_instance
   end
 
@@ -32,12 +33,5 @@ class Route
     raise 'No block given.' unless block_given?
 
     stations.each.with_index(1) { |station, index| block.call(station, index) }
-  end
-
-  private
-
-  def validate!
-    raise 'At least 2 stations required.' if
-    stations.size < 2 || stations[0].nil? || stations[1].nil?
   end
 end
